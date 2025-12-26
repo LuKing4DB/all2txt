@@ -63,6 +63,9 @@ def convert_document(
     """
     转换文档（自动根据文件类型选择处理模块）
     
+    此函数可以作为库函数调用，在出错时会抛出异常，而不是退出程序。
+    调用者应该捕获异常来处理错误情况。
+    
     Args:
         file_path: 输入文件路径（PDF或DOCX）
         output: 输出目录路径（可选）
@@ -72,19 +75,26 @@ def convert_document(
         table_images: 是否保存表格截图（仅PDF）
         export_metadata: 是否导出元数据（仅PDF）
         num_workers: 并行处理的工作进程数（仅PDF，0=自动）
+    
+    Raises:
+        FileNotFoundError: 当文件不存在时
+        ValueError: 当文件类型不支持时
+        Exception: 当转换过程中发生错误时
     """
     # 检查文件是否存在
     path = Path(file_path)
     if not path.exists():
-        logger.error(f"文件不存在: {file_path}")
-        sys.exit(1)
+        error_msg = f"文件不存在: {file_path}"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
     
     # 检测文件类型
     file_type = detect_file_type(file_path)
     
     if file_type == 'unknown':
-        logger.error(f"不支持的文件类型: {path.suffix}。仅支持 PDF (.pdf) 和 DOCX (.docx) 文件")
-        sys.exit(1)
+        error_msg = f"不支持的文件类型: {path.suffix}。仅支持 PDF (.pdf) 和 DOCX (.docx) 文件"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
     
     logger.info(f"检测到文件类型: {file_type.upper()}")
     logger.info(f"输入文件: {file_path}")
@@ -122,7 +132,7 @@ def convert_document(
             
     except Exception as e:
         logger.error(f"转换失败: {e}", exc_info=debug)
-        sys.exit(1)
+        raise  # 重新抛出异常，让调用者处理
 
 
 def main():
@@ -222,16 +232,23 @@ def main():
             )
     
     # 调用转换函数
-    convert_document(
-        file_path=args.file,
-        output=args.output,
-        debug=args.debug,
-        extract_images=args.images,
-        extract_tables=args.tables,
-        table_images=args.table_images,
-        export_metadata=args.metadata,
-        num_workers=args.workers,
-    )
+    try:
+        convert_document(
+            file_path=args.file,
+            output=args.output,
+            debug=args.debug,
+            extract_images=args.images,
+            extract_tables=args.tables,
+            table_images=args.table_images,
+            export_metadata=args.metadata,
+            num_workers=args.workers,
+        )
+    except (FileNotFoundError, ValueError) as e:
+        logger.error(str(e))
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"转换失败: {e}", exc_info=args.debug)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
