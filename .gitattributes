@@ -1,0 +1,15 @@
+# 确保文本文件使用正确的行尾符
+* text=auto
+
+# 明确指定某些文件为文本
+*.py text
+*.md text
+*.txt text
+*.toml text
+*.ini text
+*.cfg text
+
+# 确保这些文件始终使用 LF 行尾符（跨平台兼容）
+*.sh text eol=lf
+*.bat text eol=crlf
+

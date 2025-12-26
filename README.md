@@ -13,6 +13,25 @@
 
 ## 安装
 
+### 从 Git 仓库安装（推荐）
+
+```bash
+# 从 GitHub 安装（主分支）
+pip install git+https://github.com/yourusername/all2txt.git
+
+# 安装指定分支
+pip install git+https://github.com/yourusername/all2txt.git@分支名
+
+# 安装指定标签/版本
+pip install git+https://github.com/yourusername/all2txt.git@v0.1.0
+
+# 从本地 Git 仓库安装
+pip install git+file:///path/to/all2txt
+
+# 从其他 Git 托管平台安装（如 GitLab、Gitee）
+pip install git+https://gitee.com/yourusername/all2txt.git
+```
+
 ### 从本地安装
 
 ```bash
@@ -21,16 +40,6 @@ pip install .
 
 # 或者使用开发模式安装（推荐开发时使用）
 pip install -e .
-```
-
-### 从源码构建安装
-
-```bash
-# 构建分发包
-python -m build
-
-# 安装构建的包
-pip install dist/all2txt-0.1.0-py3-none-any.whl
 ```
 
 ## 使用方法
