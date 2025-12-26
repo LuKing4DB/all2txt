@@ -1,6 +1,6 @@
 """
 目录提取辅助函数
-从文本文件中提取目录区域并保存到 toc_行号开始_行号结束.txt
+从文本文件中提取目录区域并保存到 <文件名>_toc_行号开始_行号结束.txt
 """
 
 import sys
@@ -18,14 +18,15 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def extract_toc_regions_to_file(text_file_path: Path, output_dir: Path = None, pattern: str = None):
+def extract_toc_regions_to_file(text_file_path: Path, output_dir: Path = None, pattern: str = None, source_filename: str = None):
     """
-    从文本文件中提取目录区域并保存到 toc_行号开始_行号结束.txt
+    从文本文件中提取目录区域并保存到 <文件名>_toc_行号开始_行号结束.txt
     
     Args:
         text_file_path: 输入文本文件路径
         output_dir: 输出目录，如果为None则使用文本文件所在目录
         pattern: 用于基于关键字的目录检测的正则表达式模式，如果为None则使用默认模式
+        source_filename: 源文件名（不含扩展名），如果为None则从text_file_path提取
         
     Returns:
         bool: 如果成功提取并保存目录返回True，否则返回False
@@ -52,6 +53,10 @@ def extract_toc_regions_to_file(text_file_path: Path, output_dir: Path = None, p
     else:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 确定源文件名（用于文件命名）
+    if source_filename is None:
+        source_filename = text_file_path.stem
     
     # 方法1: 基于关键字的目录检测（如果提供了pattern或使用默认模式）
     toc_region_lines = set()
@@ -111,9 +116,9 @@ def extract_toc_regions_to_file(text_file_path: Path, output_dir: Path = None, p
                     toc_contents.append(line_content)
         
         if toc_contents:
-            # 生成文件名：toc_行号开始_行号结束.txt（行号从1开始显示）
+            # 生成文件名：<文件名>_toc_行号开始_行号结束.txt（行号从1开始显示）
             # 注意：内部行号是从0开始的，但文件名中显示从1开始（更符合用户习惯）
-            output_filename = f"toc_{region_start + 1}_{region_end + 1}.txt"
+            output_filename = f"{source_filename}_toc_{region_start + 1}_{region_end + 1}.txt"
             output_path = output_dir / output_filename
             
             # 写入文件

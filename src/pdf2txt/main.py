@@ -1,4 +1,4 @@
-"""PDF 文档转换器：PDF → text.txt
+"""PDF 文档转换器：PDF → <文件名>.txt
 
 专注于 PDF 文档的文本提取和转换。
 """
@@ -354,17 +354,21 @@ def convert_pdf(
         move_start = time.time()
         output_dir.mkdir(parents=True, exist_ok=True)
         
+        # 使用源文件名作为输出文件名
+        source_stem = Path(file_path).stem
+        output_text_file = output_dir / f'{source_stem}.txt'
+        
         # 删除旧的输出目录内容
-        if (output_dir / 'text.txt').exists():
-            (output_dir / 'text.txt').unlink()
+        if output_text_file.exists():
+            output_text_file.unlink()
             if debug:
-                logger.debug(f"删除旧文件: {output_dir / 'text.txt'}")
+                logger.debug(f"删除旧文件: {output_text_file}")
         
         # 移动文本文件
-        shutil.move(str(text_file), str(output_dir / 'text.txt'))
+        shutil.move(str(text_file), str(output_text_file))
         
         if debug:
-            logger.debug(f"文件已移动到: {output_dir / 'text.txt'}")
+            logger.debug(f"文件已移动到: {output_text_file}")
         
         # 移动索引文件
         if index_file.exists():
@@ -485,7 +489,7 @@ def convert_pdf(
 def main():
     """命令行入口函数"""
     parser = argparse.ArgumentParser(
-        description="PDF 文档转换器：PDF → text.txt",
+        description="PDF 文档转换器：PDF → <文件名>.txt",
         epilog="""
 示例：
   # 转换 PDF 文档（默认输出到以源文件名命名的文件夹）
@@ -494,7 +498,7 @@ def main():
   
   # 指定输出目录
   %(prog)s document.pdf --out intermediate/doc001
-  # 输出: intermediate/doc001/text.txt 和 intermediate/doc001/index.txt
+  # 输出: intermediate/doc001/<文件名>.txt 和 intermediate/doc001/<文件名>_index.txt
   
   # 查看调试信息
   %(prog)s document.pdf --debug
@@ -557,18 +561,22 @@ def main():
                 # 确保输出目录存在
                 output_dir.mkdir(parents=True, exist_ok=True)
                 
-                # 移动并重命名文件
-                if (temp_output_dir / 'text.txt').exists():
+                # 移动并重命名文件（从临时目录的<文件名>.txt移动到最终位置）
+                source_stem = file_path.stem
+                temp_text_file = temp_output_dir / f'{source_stem}.txt'
+                if temp_text_file.exists():
                     if output_text_file.exists():
                         output_text_file.unlink()
-                    shutil.move(str(temp_output_dir / 'text.txt'), str(output_text_file))
+                    shutil.move(str(temp_text_file), str(output_text_file))
                     if args.debug:
                         logger.debug(f"文本文件已输出到: {output_text_file}")
                 
-                if (temp_output_dir / 'index.txt').exists():
+                # 移动索引文件（从临时目录的<文件名>_index.txt移动到最终位置）
+                temp_index_file = temp_output_dir / f'{source_stem}_index.txt'
+                if temp_index_file.exists():
                     if output_index_file.exists():
                         output_index_file.unlink()
-                    shutil.move(str(temp_output_dir / 'index.txt'), str(output_index_file))
+                    shutil.move(str(temp_index_file), str(output_index_file))
                     if args.debug:
                         logger.debug(f"索引文件已输出到: {output_index_file}")
                 
@@ -593,7 +601,7 @@ def main():
                 
                 # 移动其他文件（如果有）
                 for item in temp_output_dir.iterdir():
-                    if item.is_file() and item.name not in ['text.txt', 'index.txt', f'{source_stem}_page.txt', f'{source_stem}_coordinate.txt']:
+                    if item.is_file() and item.name not in [f'{source_stem}.txt', f'{source_stem}_index.txt', f'{source_stem}_page.txt', f'{source_stem}_coordinate.txt']:
                         # 元数据文件等，移动到输出目录
                         shutil.move(str(item), str(output_dir / item.name))
                     elif item.is_dir():

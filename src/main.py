@@ -136,9 +136,10 @@ def _convert_document_sync(
                 debug=debug
             )
             
-            # 提取目录区域（PDF转换后，文本文件是 text.txt）
-            text_file_path = output_dir / 'text.txt'
-            extract_toc_regions_to_file(text_file_path, output_dir)
+            # 提取目录区域（PDF转换后，文本文件是 <文件名>.txt）
+            source_stem = path.stem
+            text_file_path = output_dir / f'{source_stem}.txt'
+            extract_toc_regions_to_file(text_file_path, output_dir, source_filename=source_stem)
             
         elif file_type == 'docx':
             # 调用DOCX转换函数
@@ -163,7 +164,7 @@ def _convert_document_sync(
                 text_file_path = output_dir_docx / (path.stem + '.txt')
             
             # 提取目录区域
-            extract_toc_regions_to_file(text_file_path, output_dir_docx)
+            extract_toc_regions_to_file(text_file_path, output_dir_docx, source_filename=path.stem)
         
         # 转换成功，将结果放入队列
         if result_queue:
