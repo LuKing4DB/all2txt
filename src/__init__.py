@@ -1,5 +1,5 @@
 """
-docx2data - A document processing toolkit for converting DOCX and PDF files to structured data.
+src - A document processing toolkit for converting DOCX and PDF files to structured data.
 
 This package provides tools for:
 - Converting DOCX files to TXT format
@@ -65,7 +65,7 @@ def process_document(
     
     Example:
         ```python
-        from docx2data import process_document
+        from src import process_document
         
         process_document(
             file_path="document.pdf",

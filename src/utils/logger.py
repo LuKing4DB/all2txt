@@ -91,5 +91,5 @@ def get_logger(name: str = None, level: int = logging.INFO) -> logging.Logger:
 
 
 # 创建默认的根logger（用于快速使用）
-default_logger = get_logger('docx2data', logging.INFO)
+default_logger = get_logger('src', logging.INFO)
 
