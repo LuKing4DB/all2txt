@@ -6,14 +6,22 @@
 import sys
 from pathlib import Path
 
-# 添加src目录到路径
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from utils.toc_detector import (
-    detect_toc_regions,
-    detect_toc_region_by_keyword
-)
-from utils.logger import get_logger
+# 尝试相对导入，如果失败则使用绝对导入
+try:
+    from .toc_detector import (
+        detect_toc_regions,
+        detect_toc_region_by_keyword
+    )
+    from .logger import get_logger
+except ImportError:
+    # 如果相对导入失败，使用绝对导入（兼容直接运行的情况）
+    # 添加src目录到路径
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+    from utils.toc_detector import (
+        detect_toc_regions,
+        detect_toc_region_by_keyword
+    )
+    from utils.logger import get_logger
 
 logger = get_logger(__name__)
 

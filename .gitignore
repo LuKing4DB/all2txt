@@ -21,6 +21,7 @@ wheels/
 *.egg
 MANIFEST
 doc/
+test_output/
 
 # Virtual Environment
 venv/
