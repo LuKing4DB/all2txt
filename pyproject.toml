@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "all2txt"
+version = "0.1.0"
+description = "文档转换工具：支持PDF和DOCX文件转换为TXT格式"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "all2txt contributors"}
+]
+keywords = ["pdf", "docx", "converter", "text", "document"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Text Processing",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "python-docx>=1.1.0",
+    "pdfplumber==0.11.7",
+    "pypdf>=3.9.0",
+    "lxml>=4.9.0",
+    "Pillow>=9.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+]
+
+[project.scripts]
+all2txt = "all2txt.main:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/all2txt"
+Repository = "https://github.com/yourusername/all2txt"
+Issues = "https://github.com/yourusername/all2txt/issues"
+
+[tool.setuptools]
+package-dir = {"all2txt" = "src"}
+packages = ["all2txt", "all2txt.pdf2txt", "all2txt.pdf2txt.lib", "all2txt.docx2txt", "all2txt.docx2txt.lib", "all2txt.utils"]
+
+[tool.setuptools.package-data]
+all2txt = ["*.md", "*.txt"]
+

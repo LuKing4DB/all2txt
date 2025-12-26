@@ -9,14 +9,21 @@ import argparse
 import sys
 from pathlib import Path
 
-# 添加src目录到路径
-src_dir = Path(__file__).parent / "src"
-sys.path.insert(0, str(src_dir))
-
-# 直接导入utils.logger模块，避免导入src/__init__.py（它依赖pipeline模块）
-import importlib
-utils_logger = importlib.import_module('utils.logger')
-get_logger = utils_logger.get_logger
+# 导入包内模块
+try:
+    from .utils.logger import get_logger
+    from .pdf2txt.main import convert_pdf as convert_pdf_func
+    from .docx2txt.main import docx_to_txt_simple
+except ImportError:
+    # 兼容直接运行的情况
+    import sys
+    from pathlib import Path
+    src_dir = Path(__file__).parent
+    if str(src_dir) not in sys.path:
+        sys.path.insert(0, str(src_dir))
+    from utils.logger import get_logger
+    from pdf2txt.main import convert_pdf as convert_pdf_func
+    from docx2txt.main import docx_to_txt_simple
 
 logger = get_logger(__name__)
 
@@ -84,9 +91,6 @@ def convert_document(
     
     try:
         if file_type == 'pdf':
-            # 导入PDF转换模块
-            from pdf2txt.main import convert_pdf
-            
             # 确定输出目录
             if output:
                 output_dir = Path(output)
@@ -97,7 +101,7 @@ def convert_document(
                 output_dir = input_dir / input_stem
             
             # 调用PDF转换函数
-            convert_pdf(
+            convert_pdf_func(
                 file_path=str(path),
                 output_dir=output_dir,
                 extract_images=extract_images,
@@ -109,9 +113,6 @@ def convert_document(
             )
             
         elif file_type == 'docx':
-            # 导入DOCX转换模块
-            from docx2txt.main import docx_to_txt_simple
-            
             # 调用DOCX转换函数
             docx_to_txt_simple(
                 docx_path=str(path),
