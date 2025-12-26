@@ -51,6 +51,7 @@ Issue: <关联问题编号（如有）>
 
 ### 示例
 
+**正确示例：**
 ```
 perf(converter): 合并遍历流程单次导出文本/图片/表格
 
@@ -58,4 +59,22 @@ perf(converter): 合并遍历流程单次导出文本/图片/表格
 - 移除二次遍历，减少 I/O 开销
 - 完善注释与导出配置
 ```
+
+```
+feat(pdf): 添加 PDF 文档转换功能
+
+- 实现 PDF 文本提取
+- 支持图片和表格导出
+- 添加错误处理机制
+```
+
+**错误示例（禁止使用）：**
+```
+❌ feat: Add PDF document conversion feature
+❌ fix: Fix encoding issue in DOCX processing
+❌ refactor: Improve code structure and performance
+❌ chore: Update dependencies and configuration files
+```
+
+**注意**：即使代码变更涉及英文技术术语，提交信息也必须使用中文描述。
 

@@ -6,8 +6,14 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Tuple
+import json
 
-import orjson
+# 尝试导入 orjson（高性能JSON库），如果不可用则使用标准库json
+try:
+    import orjson
+    ORJSON_AVAILABLE = True
+except ImportError:
+    ORJSON_AVAILABLE = False
 
 from utils.logger import get_logger
 from ..main import BoundingBox, PdfAnchor, TextLine
@@ -159,9 +165,13 @@ def save_table_as_json(table, table_data: List[List], output_path: Path) -> None
         "cols": len(table_data[0]) if table_data else 0  # 列数
     }
     
-    # 保存为 JSON 文件（使用 orjson 高性能库）
-    with open(output_path, 'wb') as f:
-        f.write(orjson.dumps(json_data, option=orjson.OPT_INDENT_2))
+    # 保存为 JSON 文件（优先使用 orjson 高性能库，否则使用标准库json）
+    if ORJSON_AVAILABLE:
+        with open(output_path, 'wb') as f:
+            f.write(orjson.dumps(json_data, option=orjson.OPT_INDENT_2))
+    else:
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(json_data, f, indent=2, ensure_ascii=False)
 
 
 def crop_table_region(page, bbox: tuple, output_path: Path) -> None:
