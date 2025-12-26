@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 测试输出
+intermediate/
+output/
+*.ndjson
+
+# 测试数据（大文件）
+*.pdf
+*.docx
+*.doc
+*.txt
+*.png
+*.jpg
+*.jpeg
+
+# 临时文件
+*.tmp
+*.log
+
+# 配置文件（不纳入Git管理）
+config.yaml
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 保留配置文件
+!requirements.txt
+!environment.yml
+!package.json
+!tsconfig.json
+
+# 保留示例文件
+!**/example*.json
+!**/sample*.txt
+
+*.json
+*.xml
+*.zip
+*.rels
+data/.index_cache/search_index.pkl

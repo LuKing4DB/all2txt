@@ -1,0 +1,57 @@
+# OpenAI API 配置
+openai:
+  # API的base URL
+  # 官方API: https://api.openai.com/v1
+  # 本地模型: http://localhost:8000/v1
+  base_url: http://localhost:8000/v1
+  
+  # API密钥
+  # 如果使用本地模型，可以设置为任意值
+  api_key: your-api-key-here
+  
+  # 模型名称
+  # 例如: gpt-4, gpt-3.5-turbo, 或自定义模型名称
+  model: gpt-3.5-turbo
+
+# 处理配置
+processing:
+  # API调用超时时间（秒，默认: 120）
+  timeout: 120
+
+  # 并发配置
+  # 是否启用并发验证（默认: true）
+  # 启用后，当证据数量>3时，使用协程并发验证加速
+  use_concurrent: true
+  
+  # 最大并发协程数（默认: 20）
+  # 根据API服务器的并发限制调整，建议3-20之间
+  # 使用协程（async/await）实现，并发批量验证
+  max_concurrent: 20
+  
+  # LLM生成的最大token数（默认: 8000）
+  # 模型上下文限制为32k时，建议设置为8k
+  max_tokens: 8000
+  
+  # 验证批次大小（默认: 10）
+  # 每批验证的证据数量，便于模型横向比较
+  # 注意：批次大小 * 片段大小应控制在6000token以内
+  verification_batch_size: 10
+
+# 证据质量评估配置
+quality:
+  # 最低验证分数阈值（0.0-1.0）
+  # 如果最高验证分数低于此值，认为证据不足
+  min_score_threshold: 0.3
+  
+  # 高质量证据分数阈值（0.0-1.0）
+  # 验证分数达到此值及以上的证据被认为是高质量证据
+  high_score_threshold: 0.7
+  
+  # 至少需要的高质量证据数量
+  # 如果高质量证据数量少于此值，认为证据不足
+  min_high_score_count: 1
+  
+  # 最低平均验证分数（0.0-1.0）
+  # 如果所有证据的平均验证分数低于此值，认为证据不足
+  min_avg_score: 0.4
+

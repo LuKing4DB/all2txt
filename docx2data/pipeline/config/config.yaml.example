@@ -1,0 +1,39 @@
+# OpenAI API 配置
+openai:
+  # API的base URL
+  # 官方API: https://api.openai.com/v1
+  # 本地模型: http://localhost:8000/v1
+  base_url: https://api.openai.com/v1
+  
+  # API密钥
+  # 如果使用本地模型，可以设置为任意值
+  api_key: sk-your-api-key-here
+  
+  # 模型名称
+  # 例如: gpt-4, gpt-3.5-turbo, 或自定义模型名称
+  model: gpt-4
+
+# 处理配置
+processing:
+  # 提示词文件路径（相对于脚本目录或绝对路径）
+  # 如果未指定，将使用脚本目录下的 prompt/prompt_select
+  prompt_file: prompt/prompt_select
+  
+  # 样本字符数（默认: 500）
+  sample_chars: 500
+  sample_chars_max: 8000
+
+  
+  # API调用超时时间（秒，默认: 120）
+  timeout: 120
+  
+  # 最大递归深度（默认: 1）
+  max_depth: 1
+  
+  # 最大子文件长度（字符数，默认: 0表示不限制）
+  # 如果文件长度小于等于此值，则跳过分割
+  max_file_length: 0
+  
+  # 输出目录（可选，默认在输入文件同目录下创建同名文件夹）
+  # output_dir: null
+
