@@ -17,6 +17,7 @@ try:
     from .utils.logger import get_logger
     from .pdf2txt.main import convert_pdf as convert_pdf_func
     from .docx2txt.main import docx_to_txt_simple
+    from .utils.toc_extractor import extract_toc_regions_to_file
 except ImportError:
     # 兼容直接运行的情况
     import sys
@@ -27,6 +28,8 @@ except ImportError:
     from utils.logger import get_logger
     from pdf2txt.main import convert_pdf as convert_pdf_func
     from docx2txt.main import docx_to_txt_simple
+    from utils.toc_extractor import extract_toc_regions_to_file
+    from utils.toc_extractor import extract_toc_regions_to_file
 
 logger = get_logger(__name__)
 
@@ -133,6 +136,10 @@ def _convert_document_sync(
                 debug=debug
             )
             
+            # 提取目录区域（PDF转换后，文本文件是 text.txt）
+            text_file_path = output_dir / 'text.txt'
+            extract_toc_regions_to_file(text_file_path, output_dir)
+            
         elif file_type == 'docx':
             # 调用DOCX转换函数
             docx_to_txt_simple(
@@ -140,6 +147,23 @@ def _convert_document_sync(
                 output_path=output,
                 debug=debug
             )
+            
+            # 提取目录区域（DOCX转换后，确定文本文件路径）
+            # 根据docx_to_txt_simple的逻辑，输出路径的确定方式如下：
+            if output:
+                output_path_docx = Path(output)
+                if output_path_docx.is_dir() or not output_path_docx.suffix:
+                    output_dir_docx = output_path_docx if output_path_docx.is_dir() else output_path_docx
+                    text_file_path = output_dir_docx / (path.stem + '.txt')
+                else:
+                    output_dir_docx = output_path_docx.parent / output_path_docx.stem
+                    text_file_path = output_dir_docx / output_path_docx.name
+            else:
+                output_dir_docx = path.parent / path.stem
+                text_file_path = output_dir_docx / (path.stem + '.txt')
+            
+            # 提取目录区域
+            extract_toc_regions_to_file(text_file_path, output_dir_docx)
         
         # 转换成功，将结果放入队列
         if result_queue:
