@@ -10,6 +10,7 @@
 - ✅ **表格提取**：支持从PDF中提取表格（可选）
 - ✅ **元数据导出**：支持导出PDF元数据（可选）
 - ✅ **并行处理**：支持多进程并行处理PDF文件
+- ✅ **异步支持**：提供异步接口，支持并发处理多个文件，适合Web服务和异步框架
 
 ## 安装
 
@@ -70,41 +71,81 @@ all2txt --help
 
 ### Python API使用
 
-```python
-from all2txt import convert_pdf, docx_to_txt_simple
-from pathlib import Path
-
-# 转换PDF
-convert_pdf(
-    file_path="document.pdf",
-    output_dir=Path("./output"),
-    extract_images=True,
-    extract_tables=True,
-    debug=False
-)
-
-# 转换DOCX
-docx_to_txt_simple(
-    docx_path="document.docx",
-    output_path="./output/document.txt",
-    debug=False
-)
-```
-
-### 统一转换接口
+#### 同步方式（阻塞）
 
 ```python
-from all2txt.main import convert_document
+import all2txt
 
 # 自动根据文件类型选择处理模块
-convert_document(
-    file_path="document.pdf",  # 或 document.docx
-    output="./output",
-    extract_images=True,
-    extract_tables=True,
-    debug=False
-)
+try:
+    all2txt.convert_document(
+        file_path="document.pdf",  # 或 document.docx
+        output="./output",
+        extract_images=True,
+        extract_tables=True,
+        debug=False
+    )
+    print("转换完成！")
+except FileNotFoundError as e:
+    print(f"文件不存在: {e}")
+except ValueError as e:
+    print(f"不支持的文件类型: {e}")
+except Exception as e:
+    print(f"转换失败: {e}")
 ```
+
+#### 异步方式（推荐，支持并发）
+
+```python
+import asyncio
+import all2txt
+
+async def main():
+    # 单个文件转换
+    result = await all2txt.aconvert_document(
+        "document.pdf",
+        output="./output",
+        extract_images=True,
+        extract_tables=True
+    )
+    
+    if result['success']:
+        print(f"✓ 转换成功: {result['output']}")
+    else:
+        print(f"✗ 转换失败: {result['error']}")
+    
+    # 并发处理多个文件（推荐）
+    tasks = [
+        all2txt.aconvert_document("doc1.pdf", extract_images=True),
+        all2txt.aconvert_document("doc2.pdf", extract_images=True),
+        all2txt.aconvert_document("doc3.docx"),
+    ]
+    
+    results = await asyncio.gather(*tasks)
+    for result in results:
+        if result['success']:
+            print(f"✓ {result['file_path']} 转换完成 -> {result['output']}")
+        else:
+            print(f"✗ {result['file_path']} 转换失败: {result['error']}")
+
+asyncio.run(main())
+```
+
+#### 在异步 Web 框架中使用
+
+```python
+from fastapi import FastAPI
+import all2txt
+
+app = FastAPI()
+
+@app.post("/convert")
+async def convert_endpoint(file_path: str):
+    result = await all2txt.aconvert_document(file_path)
+    return result
+```
+
+> 📖 **详细说明**：更多异步使用方法请参考 [异步使用文档](md/ASYNC_USAGE.md)
 
 ## 输出文件说明
 
