@@ -18,7 +18,7 @@ from lib.image_detector import has_image
 from lib.paragraph_processor import process_paragraph
 from lib.table_processor import process_table
 from lib.del_docx_auto_num import delete_auto_numbering_in_docx
-from lib.bookmark_processor import add_bookmarks_to_docx
+from lib.bookmark_processor import add_bookmarks_to_docx, remove_all_bookmarks
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -159,11 +159,18 @@ def docx_to_txt_simple(docx_path: str, output_path: str = None, debug: bool = Fa
         # 读取DOCX文件（可能是处理后的临时文件）
         doc = Document(actual_docx_path)
         
-        # 添加书签并生成副本
+        # 重要：先删除文档中所有已存在的书签
+        # 这确保索引生成和书签生成使用完全相同的element_index编号
+        # 因为body级别的书签元素会影响enumerate(doc.element.body)的索引
+        removed_bookmark_count = remove_all_bookmarks(doc)
+        if removed_bookmark_count > 0:
+            logger.debug(f"已从文档中移除 {removed_bookmark_count} 个旧书签元素")
+        
+        # 添加书签并生成副本（传入同一个doc对象，确保使用相同的文档结构）
         try:
             bookmarked_docx_path = output_dir / (docx_file.stem + '_bookmarked.docx')
             logger.info("正在为文档添加书签...")
-            add_bookmarks_to_docx(str(actual_docx_path), str(bookmarked_docx_path))
+            add_bookmarks_to_docx(str(actual_docx_path), str(bookmarked_docx_path), doc=doc)
             logger.info(f"✓ 已生成带书签的文档副本: {bookmarked_docx_path.name}")
         except Exception as e:
             logger.warning(f"添加书签时出错: {e}，将继续处理文档")

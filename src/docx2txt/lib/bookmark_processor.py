@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from utils.logger import get_logger
-from lib.paragraph_processor import extract_paragraph_text_raw
+from lib.paragraph_processor import extract_paragraph_text_raw, process_paragraph
 from lib.image_detector import has_image
 
 logger = get_logger(__name__)
@@ -144,35 +144,16 @@ def add_bookmark_to_table(element, bookmark_name: str, bookmark_id: int):
     element.append(bookmark_end)
 
 
-def add_bookmarks_to_docx(docx_path: str, output_path: str = None) -> str:
+def remove_all_bookmarks(doc) -> int:
     """
-    为DOCX文件中的所有段落、表格和图片添加书签，并生成副本
+    从文档中删除所有已存在的书签
     
     Args:
-        docx_path: 输入的DOCX文件路径
-        output_path: 输出的DOCX文件路径，如果为None则自动生成（在原文件名后加_bookmarked）
+        doc: Document对象
         
     Returns:
-        生成的带书签的DOCX文件路径
+        删除的书签数量
     """
-    docx_file = Path(docx_path)
-    
-    if not docx_file.exists():
-        raise FileNotFoundError(f"文件不存在: {docx_path}")
-    
-    if not docx_file.suffix.lower() == '.docx':
-        raise ValueError(f"不是DOCX文件: {docx_path}")
-    
-    # 确定输出路径
-    if output_path is None:
-        output_path = docx_file.parent / (docx_file.stem + '_bookmarked.docx')
-    else:
-        output_path = Path(output_path)
-    
-    # 读取DOCX文件
-    doc = Document(docx_path)
-    
-    # 删除文档中所有已存在的书签
     ns = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
     removed_count = 0
     
@@ -193,6 +174,42 @@ def add_bookmarks_to_docx(docx_path: str, output_path: str = None) -> str:
         if parent is not None:
             parent.remove(bookmark_end)
             removed_count += 1
+    
+    return removed_count
+
+
+def add_bookmarks_to_docx(docx_path: str, output_path: str = None, doc=None) -> str:
+    """
+    为DOCX文件中的所有段落、表格和图片添加书签，并生成副本
+    
+    Args:
+        docx_path: 输入的DOCX文件路径
+        output_path: 输出的DOCX文件路径，如果为None则自动生成（在原文件名后加_bookmarked）
+        doc: 可选的Document对象，如果提供则使用该对象（用于确保与索引生成使用相同的文档结构）
+        
+    Returns:
+        生成的带书签的DOCX文件路径
+    """
+    docx_file = Path(docx_path)
+    
+    if not docx_file.exists():
+        raise FileNotFoundError(f"文件不存在: {docx_path}")
+    
+    if not docx_file.suffix.lower() == '.docx':
+        raise ValueError(f"不是DOCX文件: {docx_path}")
+    
+    # 确定输出路径
+    if output_path is None:
+        output_path = docx_file.parent / (docx_file.stem + '_bookmarked.docx')
+    else:
+        output_path = Path(output_path)
+    
+    # 如果没有提供doc对象，则读取DOCX文件
+    if doc is None:
+        doc = Document(docx_path)
+    
+    # 删除文档中所有已存在的书签
+    removed_count = remove_all_bookmarks(doc)
     
     if removed_count > 0:
         logger.info(f"已删除 {removed_count} 个已存在的书签")
@@ -215,18 +232,22 @@ def add_bookmarks_to_docx(docx_path: str, output_path: str = None) -> str:
             
             # 处理段落 (w:p)
             if tag.endswith('}p') or tag == 'p':
-                # 检查段落是否为空：既没有文本也没有图片
-                raw_text = extract_paragraph_text_raw(doc, element, element_to_para)
-                has_image_in_para = has_image(element)
+                # 使用与索引生成相同的逻辑来判断段落是否产生内容
+                # 调用 process_paragraph 来获取实际内容项，确保书签和索引一致
+                items = process_paragraph(doc, element, element_to_para, filter_stamps=True, element_index=element_index)
                 
-                # 如果段落有文本或图片，才添加书签
-                if raw_text or has_image_in_para:
+                # 过滤掉页码，只保留实际内容（文本、图片）
+                content_items = [item for item in items if item[0] != 'page_number']
+                
+                # 如果段落产生了实际内容，才添加书签
+                if content_items:
+                    has_image_in_para = has_image(element)
                     bookmark_name = f'index_{element_index}'
                     bookmark_id_counter += 1
                     add_bookmark_to_paragraph(element, bookmark_name, bookmark_id_counter, has_image_in_para)
                     logger.debug(f"为段落 {element_index} 添加书签: {bookmark_name} (包含图片: {has_image_in_para})")
                 else:
-                    logger.debug(f"跳过空段落 {element_index}")
+                    logger.debug(f"跳过空段落或被过滤的段落 {element_index}")
             
             # 处理表格 (w:tbl)
             elif tag.endswith('}tbl') or tag == 'tbl':
