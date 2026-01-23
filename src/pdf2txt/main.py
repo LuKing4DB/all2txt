@@ -219,34 +219,50 @@ try:
         collapse_punctuation_repetition,
     )
 except Exception:  # 允许脚本直接运行时的相对导入失败
-    import sys
-    from pathlib import Path as _Path
-    _CURRENT_DIR = _Path(__file__).resolve().parent
-    _SRC_DIR = _CURRENT_DIR.parent  # src 目录
-    # 将 src 目录添加到 sys.path，以便使用包路径导入
-    if str(_SRC_DIR) not in sys.path:
-        sys.path.insert(0, str(_SRC_DIR))
-    from pdf2txt.lib.pdf_parallel import process_pdf_parallel
-    from pdf2txt.lib.pdf_writer import write_lines_to_files
-    from pdf2txt.lib.pdf_precheck import precheck_and_fix_pdf
-    from pdf2txt.lib.text_cleaner import (
-        fix_quadruple_char_repetition,
-        fix_double_char_repetition,
-        collapse_punctuation_repetition,
-    )
+    # 尝试使用包导入（当作为第三方依赖安装时）
+    try:
+        from all2txt.pdf2txt.lib.pdf_parallel import process_pdf_parallel
+        from all2txt.pdf2txt.lib.pdf_writer import write_lines_to_files
+        from all2txt.pdf2txt.lib.pdf_precheck import precheck_and_fix_pdf
+        from all2txt.pdf2txt.lib.text_cleaner import (
+            fix_quadruple_char_repetition,
+            fix_double_char_repetition,
+            collapse_punctuation_repetition,
+        )
+    except ImportError:
+        # 如果包导入也失败，使用相对路径导入（直接运行脚本时）
+        import sys
+        from pathlib import Path as _Path
+        _CURRENT_DIR = _Path(__file__).resolve().parent
+        _SRC_DIR = _CURRENT_DIR.parent  # src 目录
+        # 将 src 目录添加到 sys.path，以便使用包路径导入
+        if str(_SRC_DIR) not in sys.path:
+            sys.path.insert(0, str(_SRC_DIR))
+        from pdf2txt.lib.pdf_parallel import process_pdf_parallel
+        from pdf2txt.lib.pdf_writer import write_lines_to_files
+        from pdf2txt.lib.pdf_precheck import precheck_and_fix_pdf
+        from pdf2txt.lib.text_cleaner import (
+            fix_quadruple_char_repetition,
+            fix_double_char_repetition,
+            collapse_punctuation_repetition,
+        )
 
-# 导入日志模块
+# 导入日志模块 - 优先使用相对导入
 try:
-    from utils.logger import get_logger
+    from ..utils.logger import get_logger
 except ImportError:
-    # 如果直接运行脚本，可能需要添加路径
-    import sys
-    from pathlib import Path as _Path
-    _CURRENT_DIR = _Path(__file__).resolve().parent
-    _SRC_DIR = _CURRENT_DIR.parent  # src 目录
-    if str(_SRC_DIR) not in sys.path:
-        sys.path.insert(0, str(_SRC_DIR))
-    from utils.logger import get_logger
+    # 如果相对导入失败，尝试包绝对导入（作为第三方依赖安装时）
+    try:
+        from all2txt.utils.logger import get_logger
+    except ImportError:
+        # 如果包导入也失败，使用路径导入（直接运行脚本时）
+        import sys
+        from pathlib import Path as _Path
+        _CURRENT_DIR = _Path(__file__).resolve().parent
+        _SRC_DIR = _CURRENT_DIR.parent  # src 目录
+        if str(_SRC_DIR) not in sys.path:
+            sys.path.insert(0, str(_SRC_DIR))
+        from utils.logger import get_logger
 
 logger = get_logger(__name__)
 

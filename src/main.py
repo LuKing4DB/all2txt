@@ -25,11 +25,18 @@ except ImportError:
     src_dir = Path(__file__).parent
     if str(src_dir) not in sys.path:
         sys.path.insert(0, str(src_dir))
-    from utils.logger import get_logger
-    from pdf2txt.main import convert_pdf as convert_pdf_func
-    from docx2txt.main import docx_to_txt_simple
-    from utils.toc_extractor import extract_toc_regions_to_file
-    from utils.toc_extractor import extract_toc_regions_to_file
+    # 尝试使用包导入（当作为第三方依赖安装时）
+    try:
+        from all2txt.utils.logger import get_logger
+        from all2txt.pdf2txt.main import convert_pdf as convert_pdf_func
+        from all2txt.docx2txt.main import docx_to_txt_simple
+        from all2txt.utils.toc_extractor import extract_toc_regions_to_file
+    except ImportError:
+        # 如果包导入也失败，使用相对路径导入（直接运行脚本时）
+        from utils.logger import get_logger
+        from pdf2txt.main import convert_pdf as convert_pdf_func
+        from docx2txt.main import docx_to_txt_simple
+        from utils.toc_extractor import extract_toc_regions_to_file
 
 logger = get_logger(__name__)
 

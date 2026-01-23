@@ -8,14 +8,22 @@ import sys
 import importlib.util
 from pathlib import Path
 
-# 添加src目录到路径
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-# 添加split/lib目录到路径，以便支持直接导入
-split_lib_dir = Path(__file__).parent
-if str(split_lib_dir) not in sys.path:
-    sys.path.insert(0, str(split_lib_dir))
-
-from utils.logger import get_logger
+# 优先使用相对导入（推荐，作为包安装时使用）
+try:
+    from .logger import get_logger
+except ImportError:
+    # 如果相对导入失败，尝试包绝对导入（作为第三方依赖安装时）
+    try:
+        from all2txt.utils.logger import get_logger
+    except ImportError:
+        # 如果包导入也失败，使用路径导入（直接运行脚本时）
+        # 添加src目录到路径
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+        # 添加split/lib目录到路径，以便支持直接导入
+        split_lib_dir = Path(__file__).parent
+        if str(split_lib_dir) not in sys.path:
+            sys.path.insert(0, str(split_lib_dir))
+        from utils.logger import get_logger
 
 # 尝试相对导入，如果失败则使用绝对导入
 try:

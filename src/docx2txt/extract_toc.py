@@ -10,9 +10,18 @@ from pathlib import Path
 import zipfile
 from lxml import etree
 
-# 添加src目录到路径
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils.logger import get_logger
+# 优先使用相对导入（推荐，作为包安装时使用）
+try:
+    from ..utils.logger import get_logger
+except ImportError:
+    # 如果相对导入失败，尝试包绝对导入（作为第三方依赖安装时）
+    try:
+        from all2txt.utils.logger import get_logger
+    except ImportError:
+        # 如果包导入也失败，使用路径导入（直接运行脚本时）
+        # 添加src目录到路径
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from utils.logger import get_logger
 
 logger = get_logger(__name__)
 

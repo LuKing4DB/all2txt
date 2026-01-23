@@ -11,15 +11,34 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 
-# 添加src目录到路径，以便导入lib模块
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
-from lib.image_detector import has_image
-from lib.paragraph_processor import process_paragraph
-from lib.table_processor import process_table
-from lib.del_docx_auto_num import delete_auto_numbering_in_docx
-from lib.bookmark_processor import add_bookmarks_to_docx, remove_all_bookmarks
-from utils.logger import get_logger
+# 优先使用相对导入（推荐，作为包安装时使用）
+try:
+    from .lib.image_detector import has_image
+    from .lib.paragraph_processor import process_paragraph
+    from .lib.table_processor import process_table
+    from .lib.del_docx_auto_num import delete_auto_numbering_in_docx
+    from .lib.bookmark_processor import add_bookmarks_to_docx, remove_all_bookmarks
+    from ..utils.logger import get_logger
+except ImportError:
+    # 如果相对导入失败，尝试包绝对导入（作为第三方依赖安装时）
+    try:
+        from all2txt.docx2txt.lib.image_detector import has_image
+        from all2txt.docx2txt.lib.paragraph_processor import process_paragraph
+        from all2txt.docx2txt.lib.table_processor import process_table
+        from all2txt.docx2txt.lib.del_docx_auto_num import delete_auto_numbering_in_docx
+        from all2txt.docx2txt.lib.bookmark_processor import add_bookmarks_to_docx, remove_all_bookmarks
+        from all2txt.utils.logger import get_logger
+    except ImportError:
+        # 如果包导入也失败，使用路径导入（直接运行脚本时）
+        # 添加src目录到路径，以便导入lib模块
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        sys.path.insert(0, str(Path(__file__).parent))
+        from lib.image_detector import has_image
+        from lib.paragraph_processor import process_paragraph
+        from lib.table_processor import process_table
+        from lib.del_docx_auto_num import delete_auto_numbering_in_docx
+        from lib.bookmark_processor import add_bookmarks_to_docx, remove_all_bookmarks
+        from utils.logger import get_logger
 
 logger = get_logger(__name__)
 

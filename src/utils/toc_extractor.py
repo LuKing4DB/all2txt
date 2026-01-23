@@ -6,7 +6,7 @@
 import sys
 from pathlib import Path
 
-# 尝试相对导入，如果失败则使用绝对导入
+# 优先使用相对导入（推荐，作为包安装时使用）
 try:
     from .toc_detector import (
         detect_toc_regions,
@@ -14,14 +14,22 @@ try:
     )
     from .logger import get_logger
 except ImportError:
-    # 如果相对导入失败，使用绝对导入（兼容直接运行的情况）
-    # 添加src目录到路径
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-    from utils.toc_detector import (
-        detect_toc_regions,
-        detect_toc_region_by_keyword
-    )
-    from utils.logger import get_logger
+    # 如果相对导入失败，尝试使用包绝对导入（作为第三方依赖安装时）
+    try:
+        from all2txt.utils.toc_detector import (
+            detect_toc_regions,
+            detect_toc_region_by_keyword
+        )
+        from all2txt.utils.logger import get_logger
+    except ImportError:
+        # 如果包导入也失败，使用路径导入（直接运行脚本时）
+        # 添加src目录到路径
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+        from utils.toc_detector import (
+            detect_toc_regions,
+            detect_toc_region_by_keyword
+        )
+        from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
